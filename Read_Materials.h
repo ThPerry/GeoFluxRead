@@ -43,12 +43,17 @@ void Load_Materials(std::vector<Material> &M, std::string Address)
 {
 	std::ifstream File;
 	File.open(Address);
+	std::clock_t start = std::clock();
+	double duration;
 
 	if (!File)
 	{
-		printf("Not able to read the file \"%s\"", Address.c_str());
+		printf("Not able to read the file \"%s\"\n", Address.c_str());
+		system("pause");
 		exit(1);
 	}
+
+	std::cout << ">>> loading .prp. . .";
 
 	std::string line;
 
@@ -59,5 +64,7 @@ void Load_Materials(std::vector<Material> &M, std::string Address)
 		Get_Material(M[i], File);
 		Print_Progress(i, M.size(), "Loading .prp");
 	}
-	Print_Progress(1, 1, "Loading .prp");
+	
+	duration = (std::clock() - start) / (double)CLOCKS_PER_SEC;
+	std::cout << "\r>>> loading .prp\t\tElapsed Time: " << duration << "s\n";
 }

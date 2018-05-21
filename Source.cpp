@@ -9,6 +9,9 @@
 #include <sstream>
 #include <string>
 
+#include <cstdio>
+#include <ctime>
+
 #include "General.h"
 #include "Read_Dat.h"
 #include "Read_Mesh.h"
@@ -21,7 +24,11 @@
 int main()
 {
 	std::string
-		name = "DFN_p21_0056",
+		inFolder = "C:\\Users\\thiago\\source\\repos\\Conversor\\Conversor\\MODEL_2",
+		outFolder = "C:\\Users\\thiago\\source\\repos\\Conversor\\Conversor\\MODEL_2",
+
+		//name = "DFN_p21_0056",
+		name = inFolder + "\\" + "MODEL_2",
 		//name = "DFN_3D_no_intersection_Flow_X",
 
 		msh = name + ".post.msh",
@@ -31,13 +38,13 @@ int main()
 		fra = name + ".fra",
 		pre = name + ".pre",
 
-		out = "Out.txt",
-		bco_out = "Out_bco.txt",
-		fra_out = "Out_fra.txt",
-		pre_out = "Out_pre.txt";
+		out = outFolder + "\\" + "Out.txt",
+		bco_out = outFolder + "\\" + "Out_bco.txt",
+		fra_out = outFolder + "\\" + "Out_fra.txt",
+		pre_out = outFolder + "\\" + "Out_pre.txt";
 
 	std::vector<Node> N;
-	std::vector<Element> E;
+	std::vector<Element> E, EI;
 	std::vector<Material> M;
 	std::vector<Fracture_Prop> F;
 	Dat_Info D;
@@ -47,17 +54,20 @@ int main()
 	Load_Dat(D, dat);
 
 	N.resize(D.NPOIN);
-	E.resize(D.NELEM + D.NELINT);
+	E.resize(D.NELEM);
+	EI.resize(D.NELINT);
 	M.resize(D.NMATS);
 	F.resize(D.NELINT);
 
-	Load_Mesh(N,E,msh,D);
+	Load_Mesh(N,E,EI,msh,D);
 	Load_Materials(M, prp);
 	Load_bco(bco, bco_out);
 	Load_Fra(F, fra);
 	Load_Pre(pre, pre_out);
 
-	Print_Results(D, N, E, M, out);
+	Print_Results(D, N, E, EI, M, out);
+
+	printf("%.8d\n", N[2].n);
 
 	system("pause");
 

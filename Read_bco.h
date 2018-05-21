@@ -150,6 +150,40 @@ void Get_Node_Variable_Displacements(std::ifstream& inFile, std::ofstream& OutFi
 		//Print_Progress(i, NNVD, "Loading .bco NVD");
 	}
 }
+void Get_Elem_Var_Pressure(std::ifstream& inFile, std::ofstream& OutFile)
+{
+	int ENVP, Elem, FUNCT_P, FACE_NODES[8];
+	std::string line;
+
+	OutFile << "\t%ELEMENTS_VARIABLE_PRESSURE" << std::endl <<std::endl;
+
+	Skip_inFile_Lines(inFile, 2);
+	std::getline(inFile, line);
+	std::istringstream iss(line);
+	iss >> ENVP;
+
+	OutFile << "\t  ELEMENTS   Funct_P     FACE NODES" << std::endl;
+	OutFile << "\t---------+---------+---------+---------+---------+---------+---------+---------+---------+---------+" << std::endl;
+
+	for (int skip = 0; skip < 3; skip++)
+		std::getline(inFile, line);
+
+	for (int i = 0; i < ENVP; i++)
+	{
+		inFile >> Elem >> FUNCT_P;
+
+		OutFile << "\t" << std::setfill(' ') << std::setw(10) << Elem;
+		OutFile << std::setfill(' ') << std::setw(10) << FUNCT_P;
+		
+		for (int j = 0; j < 8; j++)
+		{
+			inFile >> FACE_NODES[i];
+			OutFile << std::setfill(' ') << std::setw(10) << FACE_NODES[i];
+		}
+
+		OutFile << std::endl;
+	}
+}
 void Load_bco(std::string AddressIn, std::string AddressOut)
 {
 	std::ifstream inFile;
@@ -162,8 +196,12 @@ void Load_bco(std::string AddressIn, std::string AddressOut)
 		exit(1);
 	}
 
+	std::cout << ">>> loading .bco. . .";
+
 	std::ofstream OutFile;
 	OutFile.open(AddressOut);
+	std::clock_t start = std::clock();
+	double duration;
 
 	OutFile << "# ==================================================================================================================================\n";
 	OutFile << "# bco_Info\n";
@@ -175,8 +213,12 @@ void Load_bco(std::string AddressIn, std::string AddressOut)
 			Get_Node_Var_Hydraulic_Pressure(inFile, OutFile);
 		if (line == "%NODES_FIXED_DISPLACEMENT")
 			Get_Node_Fixed_Displacements(inFile, OutFile);
+		if (line == "%ELEMENTS_VARIABLE_PRESSURE")
+			Get_Elem_Var_Pressure(inFile, OutFile);
 		if (line == "%NODES_VARIABLE_DISPLACEMENT")
 			Get_Node_Variable_Displacements(inFile, OutFile);
 	}
-	Print_Progress(1, 1, "Loading .bco");
+	
+	duration = (std::clock() - start) / (double)CLOCKS_PER_SEC;
+	std::cout << "\r>>> loading .bco\t\tElapsed Time: " << duration << "s\n";
 }

@@ -2,35 +2,31 @@ void Get_Node_Coordinates(std::ifstream& inFile, std::vector<Node> &N)
 {
 	int i = 0;
 	std::string line;
-
-
+	
 	std::getline(inFile, line);
-	/*
+
+	std::cout << "\r>>> loading Nodes .msh. . .\t\t\t";
+
+
 	while (std::getline(inFile, line) && line != "End Coordinates")
 	{
 		std::istringstream iss(line);
+		iss >> N[i].n >> N[i].Coord.x >> N[i].Coord.y >> N[i].Coord.z;
 
-		if (iss >> N[i].n >> N[i].Coord.x >> N[i].Coord.y >> N[i].Coord.z)
-
-		Print_Progress(i, N.size(), "Loading .msh Node");
 		i++;
 	}
-	*/
-	
-	/*
-	for (int i = 0; i < N.size(); i++)
-		inFile >> N[i].n >> N[i].Coord.x >> N[i].Coord.y >> N[i].Coord.z;
-	*/
-	
+		
 }
 
 int Get_Elements(std::ifstream& inFile, std::vector<Element> &E,int pos, bool IsInterface)
 {
 	char a;
 	int Params[4], n;
-
 	std::string line;
+
 	std::getline(inFile, line);
+
+	std::cout << "\r>>> loading Elemnts .msh. . .\t\t\t";
 
 	std::istringstream iss(line);
 
@@ -61,10 +57,9 @@ int Get_Elements(std::ifstream& inFile, std::vector<Element> &E,int pos, bool Is
 
 			iss >> E[pos].Lmat >> E[pos].LcoH >> E[pos].LcoM >> E[pos].LcoT >> E[pos].Ltip >> E[pos].Nnom >> E[pos].Nnof >> E[pos].Ngau;
 
-			//Print_Progress(pos, E.size(), "Loading .msh Elem");
 			pos++;
 		}
-	else 
+	else
 		while (std::getline(inFile, line) && line != "End Elements")
 		{
 			E[pos].Node_Numbers.resize(Params[1]);
@@ -94,14 +89,17 @@ int Get_Elements(std::ifstream& inFile, std::vector<Element> &E,int pos, bool Is
 			//Print_Progress(pos, E.size(), "Loading .msh Elem");
 			pos++;
 		}
-		
+	
+
 	return pos;
 }
 
-void Load_Mesh(std::vector<Node> &N, std::vector<Element> &E, std::string Address, Dat_Info D)
+void Load_Mesh(std::vector<Node> &N, std::vector<Element> &E, std::vector<Element> &EI, std::string Address, Dat_Info D)
 {
 	std::ifstream File;
 	File.open(Address);
+	std::clock_t start = std::clock();
+	double duration;
 
 	if (!File)
 	{
@@ -109,6 +107,8 @@ void Load_Mesh(std::vector<Node> &N, std::vector<Element> &E, std::string Addres
 		system("pause");
 		exit(1);
 	}
+
+	std::cout << ">>> loading .msh. . .";
 
 	int pos = 0;
 
@@ -121,14 +121,15 @@ void Load_Mesh(std::vector<Node> &N, std::vector<Element> &E, std::string Addres
 		
 		if (line == "Elements")
 		{
-			if((int)E.size() < D.NELEM)
+			if(pos < D.NELEM)
 				pos = Get_Elements(File, E, pos, false);
 			else
-				pos = Get_Elements(File, E, pos, true);
+				pos = Get_Elements(File, EI, 0, true);
 		}
 	}
 
-	Print_Progress(pos+1, E.size(), "Loading .post.msh");
+	duration = (std::clock() - start) / (double)CLOCKS_PER_SEC;
+	std::cout << "\r>>> loading .msh\t\tElapsed Time: " << duration << "s\n";
 
 	File.close();
 }

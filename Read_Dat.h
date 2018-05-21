@@ -149,13 +149,17 @@ void Load_Dat(Dat_Info &D, std::string Address)
 	std::ifstream File;
 	File.open(Address);
 
+	std::clock_t start = std::clock();
+	double duration;
+
 	if (!File)
 	{
-		printf("Not able to read the file \"%s\"", Address.c_str());
+		printf("Not able to read the file \"%s\"\n", Address.c_str());
+		system("pause");
 		exit(1);
 	}
 
-	Print_Progress(0, 5, "Loading .dat");
+	std::cout << ">>> loading .dat";
 
 	Get_Autorun(D, File);
 
@@ -166,30 +170,28 @@ void Load_Dat(Dat_Info &D, std::string Address)
 		if (line == "%GENERAL_DATA")
 		{
 			Get_General_Data(D, File);
-			Print_Progress(1, 5, "Loading .dat");
 		}
 		else if (line == "%SOLUTION_PARAMETERS")
 		{
 			Get_General_Solution_Param(D, File);
-			Print_Progress(2, 5, "Loading .dat");
 		}
 		else if (line == "%STEPS_DEFINITION")
 		{
 			Get_Steps_Def(D, File);
-			Print_Progress(3, 5, "Loading .dat");
 		}
 		else if (line == "%OUTPUT_DEFINITION")
 		{
 			Get_Output_Def(D, File);
-			Print_Progress(4, 5, "Loading .dat");
 		}
 		else if (line == "%TIME_FUNCTIONS")
 		{
 			Get_Time_Functs(D, File);
-			Print_Progress(5, 5, "Loading .dat");
 		}
 			
 	}
+
+	duration = (std::clock() - start) / (double)CLOCKS_PER_SEC;
+	std::cout << "\r>>> loading .dat\t\tElapsed Time: " << duration << "s\n";
 
 	File.close();
 }

@@ -9,15 +9,15 @@ void Get_Fra_Prop(std::vector<Fracture_Prop> &F, std::ifstream& inFile)
 		std::istringstream iss(line);
 
 		iss >> F[i].Ielem >> F[i].Updiniap >> F[i].Ini_act >> F[i].b0 >> F[i].e0 >> F[i].usecrior >> F[i].strike >> F[i].dip >> F[i].fluidweight >> F[i].fluidvisc;
-		Print_Progress(i, F.size(), "Loading .fra");
 		i++;
 	}
-	Print_Progress(i+1, F.size(), "Loading .fra");
 }
 void Load_Fra(std::vector<Fracture_Prop> &F, std::string Address)
 {
 	std::ifstream File;
 	File.open(Address);
+	std::clock_t start = std::clock();
+	double duration;
 
 	if (!File)
 	{
@@ -26,11 +26,16 @@ void Load_Fra(std::vector<Fracture_Prop> &F, std::string Address)
 		exit(1);
 	}
 
+	std::cout << ">>> loading .fra. . .";
+
 	std::string line;
 
 	while (std::getline(File, line))
 		if (line == "%INITIAL_FRACTURE_DATA")
 			Get_Fra_Prop(F, File);
+
+	duration = (std::clock() - start) / (double)CLOCKS_PER_SEC;
+	std::cout << "\r>>> loading .fra\t\tElapsed Time: " << duration << "s\n";
 
 	File.close();
 }
